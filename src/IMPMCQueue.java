@@ -27,7 +27,7 @@ public interface IMPMCQueue<T>
     /**
      * Non-blocking query function, this is technically an approximate value
      * since after function succeeds, another thread may remove/add an item.
-     * @retun remaining size
+     * @return remaining size
      */
     int RemainingSize();
 

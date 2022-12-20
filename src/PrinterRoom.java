@@ -1,20 +1,28 @@
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.locks.Lock;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-public class PrinterRoom
-{
-    private class Printer implements Runnable
-    {
-        // TODO: Implement
-        // ....
+public class PrinterRoom {
+    private class Printer implements Runnable {
+        int id;
+        IMPMCQueue<PrintItem> queue;
 
-        public Printer(int id, IMPMCQueue<PrintItem> roomQueue)
-        {
-            // TODO: Implement
+        public Printer(int id, IMPMCQueue<PrintItem> roomQueue) {
+            this.id = id;
+            this.queue = roomQueue;
         }
 
+        public void run() {
+            while (true) {
+                PrintItem item = roomQueue.Consume();
+                item.print();
+                SyncLogger.Instance().Log(SyncLogger.ThreadType.CONSUMER, this.id,
+                        String.format(SyncLogger.FORMAT_PRINT_DONE, item));
+            }
+        }
     }
 
     private IMPMCQueue<PrintItem> roomQueue;
@@ -31,15 +39,29 @@ public class PrinterRoom
                                                          .mapToObj(i -> new Printer(i, roomQueue))
                                                          .collect(Collectors.toList()));
         // Printers are launched using the same queue
+        for(Printer p : printers) {
+            new Thread(p).start();
+            SyncLogger.Instance().Log(SyncLogger.ThreadType.MAIN_THREAD, p.id,
+                    String.format(SyncLogger.FORMAT_PRINTER_LAUNCH, p.id));
+        }
     }
 
     public boolean SubmitPrint(PrintItem item, int producerId)
     {
-        // TODO: Implement
+        SyncLogger.Instance().Log(SyncLogger.ThreadType.PRODUCER, producerId,
+                String.format(SyncLogger.FORMAT_ADD, item));;
+        try{
+            roomQueue.Add(item);
+        }
+        catch(QueueIsClosedExecption e){
+            SyncLogger.Instance().Log(SyncLogger.ThreadType.PRODUCER, producerId,
+                    String.format(SyncLogger.FORMAT_ROOM_CLOSED, item));
+            return false;
+        }
+        return true;
     }
 
-    public void CloseRoom()
-    {
-        // TODO: Implement
+    public void CloseRoom() {
+        roomQueue.CloseQueue();
     }
 }

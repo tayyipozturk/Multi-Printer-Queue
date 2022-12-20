@@ -1,0 +1,31 @@
+MT          [00]; 0000000000011782000; Printer 0 is launched.
+MT          [01]; 0000000000013019000; Printer 1 is launched.
+MT          [00]; 0000000000013751000; Creating Producer 0
+MT          [01]; 0000000000013914000; Creating Producer 1
+MT          [02]; 0000000000014042000; Creating Producer 2
+MT          [03]; 0000000000014331000; Creating Producer 3
+MT          [04]; 0000000000014609000; Creating Producer 4
+PRODUCER    [00]; 0000000000016202000; Trying to Add   {Instructor, ID:000, 100ms}
+PRODUCER    [01]; 0000000000016646000; Trying to Add   {Student   , ID:001, 050ms}
+PRODUCER    [02]; 0000000000016824000; Trying to Add   {Student   , ID:002, 050ms}
+PRODUCER    [03]; 0000000000016990000; Trying to Add   {Instructor, ID:003, 2950ms}
+PRODUCER    [04]; 0000000000017126000; Trying to Add   {Student   , ID:004, 050ms}
+[C]PRINTER  [01]; 0000000000073444000; Printing        {Student   , ID:001, 050ms} is done!
+[C]PRINTER  [00]; 0000000000119311000; Printing        {Instructor, ID:000, 100ms} is done!
+[C]PRINTER  [00]; 0000000000174985000; Printing        {Student   , ID:002, 050ms} is done!
+[C]PRINTER  [00]; 0000000000230385000; Printing        {Student   , ID:004, 050ms} is done!
+MT          [00]; 0000000003022341000; Closing Room
+MT          [06]; 0000000003023668000; Creating Producer 6
+MT          [07]; 0000000003024280000; Creating Producer 7
+MT          [08]; 0000000003024860000; Creating Producer 8
+MT          [09]; 0000000003025277000; Creating Producer 9
+PRODUCER    [06]; 0000000003025769000; Trying to Add   {Instructor, ID:005, 300ms}
+PRODUCER    [06]; 0000000003026445000; Room is closed, {Instructor, ID:005, 300ms} is skipped!
+PRODUCER    [07]; 0000000003027183000; Trying to Add   {Student   , ID:006, 500ms}
+PRODUCER    [07]; 0000000003027679000; Room is closed, {Student   , ID:006, 500ms} is skipped!
+PRODUCER    [08]; 0000000003028103000; Trying to Add   {Student   , ID:007, 050ms}
+PRODUCER    [08]; 0000000003028613000; Room is closed, {Student   , ID:007, 050ms} is skipped!
+[C]PRINTER  [01]; 0000000003029231000; Printing        {Instructor, ID:003, 2950ms} is done!
+PRODUCER    [09]; 0000000003029351000; Trying to Add   {Instructor, ID:008, 100ms}
+PRODUCER    [09]; 0000000003030091000; Room is closed, {Instructor, ID:008, 100ms} is skipped!
+MT          [00]; 0000000003030418000; Room is Closed
