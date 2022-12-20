@@ -8,7 +8,7 @@ public class PrinterQueue implements IMPMCQueue<PrintItem> {
     private static ArrayBlockingQueue<PrintItem> studentQueue;
     private int size;
     private int count;
-    private boolean isClosed;
+    private static boolean isClosed;
 
     private static Lock lock = new ReentrantLock();
     private static Condition notFull = lock.newCondition();
@@ -22,14 +22,15 @@ public class PrinterQueue implements IMPMCQueue<PrintItem> {
         count = 0;
     }
 
+    @Override
     public void Add(PrintItem item) throws QueueIsClosedExecption {
         lock.lock();
         try {
-            if (isClosed) {
-                throw new QueueIsClosedExecption();
-            }
             while (RemainingSize() == 0) {
                 notFull.await();
+            }
+            if (isClosed) {
+                throw new QueueIsClosedExecption();
             }
             if (item.getPrintType() == PrintItem.PrintType.INSTRUCTOR) {
                 instructorQueue.add(item);
@@ -45,10 +46,14 @@ public class PrinterQueue implements IMPMCQueue<PrintItem> {
         }
     }
 
+    @Override
     public PrintItem Consume() throws QueueIsClosedExecption {
         lock.lock();
         try {
             while (RemainingSize() == size) {
+                if (isClosed) {
+                    throw new QueueIsClosedExecption();
+                }
                 notEmpty.await();
             }
             PrintItem item = null;
@@ -58,9 +63,6 @@ public class PrinterQueue implements IMPMCQueue<PrintItem> {
                 item = studentQueue.remove();
             }
             count--;
-            if (isDone()) {
-                throw new QueueIsClosedExecption();
-            }
             notFull.signal();
             return item;
         } catch (InterruptedException e) {
@@ -71,17 +73,15 @@ public class PrinterQueue implements IMPMCQueue<PrintItem> {
         return null;
     }
 
+    @Override
     public int RemainingSize() {
         return size - count;
     }
 
+    @Override
     public void CloseQueue() {
         lock.lock();
         isClosed = true;
         lock.unlock();
-    }
-
-    private boolean isDone() {
-        return (RemainingSize() == size && isClosed);
     }
 }

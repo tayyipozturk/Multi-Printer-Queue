@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Semaphore;
@@ -15,18 +16,28 @@ public class PrinterRoom {
             this.queue = roomQueue;
         }
 
+        @Override
         public void run() {
             while (true) {
-                PrintItem item = roomQueue.Consume();
-                item.print();
-                SyncLogger.Instance().Log(SyncLogger.ThreadType.CONSUMER, this.id,
-                        String.format(SyncLogger.FORMAT_PRINT_DONE, item));
+                PrintItem item = null;
+                try{
+                    item = roomQueue.Consume();
+                    item.print();
+                    SyncLogger.Instance().Log(SyncLogger.ThreadType.CONSUMER, this.id,
+                            String.format(SyncLogger.FORMAT_PRINT_DONE, item));
+                }
+                catch (QueueIsClosedExecption e) {
+                    SyncLogger.Instance().Log(SyncLogger.ThreadType.CONSUMER, id,
+                        String.format(SyncLogger.FORMAT_TERMINATING, id));
+                    break;
+                }
             }
         }
     }
 
     private IMPMCQueue<PrintItem> roomQueue;
     private final List<Printer> printers;
+    private ArrayList<Thread> threads;
 
     public PrinterRoom(int printerCount, int maxElementCount)
     {
@@ -39,8 +50,11 @@ public class PrinterRoom {
                                                          .mapToObj(i -> new Printer(i, roomQueue))
                                                          .collect(Collectors.toList()));
         // Printers are launched using the same queue
+        threads = new ArrayList<>();
         for(Printer p : printers) {
-            new Thread(p).start();
+            Thread t = new Thread(p);
+            t.start();
+            threads.add(t);
             SyncLogger.Instance().Log(SyncLogger.ThreadType.MAIN_THREAD, p.id,
                     String.format(SyncLogger.FORMAT_PRINTER_LAUNCH, p.id));
         }
@@ -54,8 +68,6 @@ public class PrinterRoom {
             roomQueue.Add(item);
         }
         catch(QueueIsClosedExecption e){
-            SyncLogger.Instance().Log(SyncLogger.ThreadType.PRODUCER, producerId,
-                    String.format(SyncLogger.FORMAT_ROOM_CLOSED, item));
             return false;
         }
         return true;
@@ -63,5 +75,12 @@ public class PrinterRoom {
 
     public void CloseRoom() {
         roomQueue.CloseQueue();
+        for(Thread t : threads) {
+            try {
+                t.join();
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 }
