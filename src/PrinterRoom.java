@@ -17,7 +17,7 @@ public class PrinterRoom {
         @Override
         public void run() {
             while (true) {
-                PrintItem item = null;
+                PrintItem item;
                 try{
                     item = roomQueue.Consume();
                     item.print();
@@ -61,7 +61,7 @@ public class PrinterRoom {
     public boolean SubmitPrint(PrintItem item, int producerId)
     {
         SyncLogger.Instance().Log(SyncLogger.ThreadType.PRODUCER, producerId,
-                String.format(SyncLogger.FORMAT_ADD, item));;
+                String.format(SyncLogger.FORMAT_ADD, item));
         try{
             roomQueue.Add(item);
         }

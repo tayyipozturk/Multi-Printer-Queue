@@ -71,7 +71,6 @@ public class Main
 
         SyncLogger.Instance().Log(SyncLogger.ThreadType.MAIN_THREAD, 0,
                 "Room is Closed");
-
     }
 
     public static void main(String args[]) throws InterruptedException {
