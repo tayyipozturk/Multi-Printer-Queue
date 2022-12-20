@@ -1,8 +1,6 @@
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.Semaphore;
-import java.util.concurrent.locks.Lock;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -26,7 +24,7 @@ public class PrinterRoom {
                     SyncLogger.Instance().Log(SyncLogger.ThreadType.CONSUMER, this.id,
                             String.format(SyncLogger.FORMAT_PRINT_DONE, item));
                 }
-                catch (QueueIsClosedExecption e) {
+                catch (QueueIsClosedException e) {
                     SyncLogger.Instance().Log(SyncLogger.ThreadType.CONSUMER, id,
                         String.format(SyncLogger.FORMAT_TERMINATING, id));
                     break;
@@ -67,7 +65,7 @@ public class PrinterRoom {
         try{
             roomQueue.Add(item);
         }
-        catch(QueueIsClosedExecption e){
+        catch(QueueIsClosedException e){
             return false;
         }
         return true;

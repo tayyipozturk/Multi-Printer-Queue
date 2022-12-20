@@ -4,11 +4,11 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class PrinterQueue implements IMPMCQueue<PrintItem> {
-    private static ArrayBlockingQueue<PrintItem> instructorQueue;
-    private static ArrayBlockingQueue<PrintItem> studentQueue;
+    private ArrayBlockingQueue<PrintItem> instructorQueue;
+    private ArrayBlockingQueue<PrintItem> studentQueue;
     private int size;
     private int count;
-    private static boolean isClosed;
+    private boolean isClosed;
 
     private static Lock lock = new ReentrantLock();
     private static Condition notFull = lock.newCondition();
@@ -23,14 +23,17 @@ public class PrinterQueue implements IMPMCQueue<PrintItem> {
     }
 
     @Override
-    public void Add(PrintItem item) throws QueueIsClosedExecption {
+    public void Add(PrintItem item) throws QueueIsClosedException {
         lock.lock();
         try {
             while (RemainingSize() == 0) {
                 notFull.await();
+                if (isClosed) {
+                    throw new QueueIsClosedException();
+                }
             }
             if (isClosed) {
-                throw new QueueIsClosedExecption();
+                throw new QueueIsClosedException();
             }
             if (item.getPrintType() == PrintItem.PrintType.INSTRUCTOR) {
                 instructorQueue.add(item);
@@ -47,12 +50,12 @@ public class PrinterQueue implements IMPMCQueue<PrintItem> {
     }
 
     @Override
-    public PrintItem Consume() throws QueueIsClosedExecption {
+    public PrintItem Consume() throws QueueIsClosedException {
         lock.lock();
         try {
             while (RemainingSize() == size) {
                 if (isClosed) {
-                    throw new QueueIsClosedExecption();
+                    throw new QueueIsClosedException();
                 }
                 notEmpty.await();
             }
@@ -82,6 +85,7 @@ public class PrinterQueue implements IMPMCQueue<PrintItem> {
     public void CloseQueue() {
         lock.lock();
         isClosed = true;
+        notFull.signalAll();
         lock.unlock();
     }
 }

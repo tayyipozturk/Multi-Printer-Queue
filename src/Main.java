@@ -19,17 +19,14 @@ public class Main
 
         @Override
         public void run() {
-            while (true)
-            {
-                PrintItem item = new PrintItem(new Random().nextInt(1000), type, id);
-                if(!room.SubmitPrint(item, id))
-                {
-                    SyncLogger.Instance().Log(SyncLogger.ThreadType.PRODUCER, id,
-                            String.format(SyncLogger.FORMAT_ROOM_CLOSED, item));
-                    SyncLogger.Instance().Log(SyncLogger.ThreadType.PRODUCER, id,
-                            String.format(SyncLogger.FORMAT_TERMINATING, id));
-                    break;
-                }
+            PrintItem item = new PrintItem(new Random().nextInt(1000), type, id);
+            if(room.SubmitPrint(item, id)) {
+                SyncLogger.Instance().Log(SyncLogger.ThreadType.PRODUCER, id,
+                        String.format(SyncLogger.FORMAT_TERMINATING, id));
+            }
+            else{
+                SyncLogger.Instance().Log(SyncLogger.ThreadType.PRODUCER, id,
+                        String.format(SyncLogger.FORMAT_ROOM_CLOSED, item));
                 SyncLogger.Instance().Log(SyncLogger.ThreadType.PRODUCER, id,
                         String.format(SyncLogger.FORMAT_TERMINATING, id));
             }
@@ -45,10 +42,10 @@ public class Main
         }
     }
 
-    public static void main(String args[]) throws InterruptedException
-    {
+    public static void test() throws InterruptedException{
         PrinterRoom room = new PrinterRoom(2, 8);
         List<Producer> producers = new ArrayList<>();
+        List<Thread> threads = new ArrayList<>();
 
         for (int i = 0; i < 30; i++) {
             PrintItem.PrintType type = (i % 2 == 0) ? PrintItem.PrintType.STUDENT : PrintItem.PrintType.INSTRUCTOR;
@@ -56,7 +53,9 @@ public class Main
         }
 
         for (Producer p : producers) {
-            new Thread(p).start();
+            Thread t = new Thread(p);
+            t.start();
+            threads.add(t);
         }
 
         Thread.sleep((long)(3 * 1000));
@@ -66,11 +65,16 @@ public class Main
 
         room.CloseRoom();
 
+        for (Thread t : threads) {
+            t.join();
+        }
+
         SyncLogger.Instance().Log(SyncLogger.ThreadType.MAIN_THREAD, 0,
                 "Room is Closed");
 
-        for (Producer p : producers) {
-            p.join();
-        }
+    }
+
+    public static void main(String args[]) throws InterruptedException {
+        test();
     }
 }

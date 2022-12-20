@@ -1,14 +1,12 @@
-
-
 public interface IMPMCQueue<T>
 {
     /**
      * Adds data to the queue, waits if queue is full
      *
      * @param data data to be added into the queue
-     * @throws QueueIsClosedExecption when adding operation is suspended.
+     * @throws QueueIsClosedException when adding operation is suspended.
      */
-    void Add(T data) throws QueueIsClosedExecption;
+    void Add(T data) throws QueueIsClosedException;
 
     /**
      * Consumes the first element with respect to the priority of the type T,
@@ -18,11 +16,11 @@ public interface IMPMCQueue<T>
      * from the student print items (but 'first come, first served' is still true internally
      * between students and instructors).
      *
-     * @throws QueueIsClosedExecption when there are no elements left on the queue and queue is closed
+     * @throws QueueIsClosedException when there are no elements left on the queue and queue is closed
      *          (with CloseQueue function)
      * @return returns the element
      */
-    T Consume() throws QueueIsClosedExecption;
+    T Consume() throws QueueIsClosedException;
 
     /**
      * Non-blocking query function, this is technically an approximate value
@@ -33,7 +31,7 @@ public interface IMPMCQueue<T>
 
     /**
      * Notifies every thread that is waiting on this queue (threads that are waiting
-     * on the functions will return throw QueueIsClosedExecption as a notification)
+     * on the functions will return throw QueueIsClosedException as a notification)
      *
      * After this call,
      *   - Consumers should not be terminated until every item on the queue is processed. After that
