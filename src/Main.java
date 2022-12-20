@@ -13,7 +13,7 @@ public class Main
             this.id = id;
             this.room = room;
             this.type = type;
-            SyncLogger.Instance().Log(SyncLogger.ThreadType.PRODUCER, this.id,
+            SyncLogger.Instance().Log(SyncLogger.ThreadType.MAIN_THREAD, this.id,
                     String.format(SyncLogger.FORMAT_PRODUCER_LAUNCH, this.id));
         }
 
